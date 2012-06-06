@@ -18,7 +18,7 @@ class Module implements
 
     public function onBootstrap(Event $mvcEvent)
     {
-        $ms = $mvcEvent->getApplication()->getServiceManager()->get('EdpSession.Service');
+        $ms = $mvcEvent->getApplication()->getServiceManager()->get('SpeckMultisite.Service');
         $ms->initializeSession($mvcEvent);
     }
 
@@ -31,7 +31,7 @@ class Module implements
             ),
             'Zend\Loader\StandardAutoloader' => array(
                 'namespaces' => array(
-                    'EdpSession' => __DIR__ . '/src/EdpSession',
+                    __NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
                 ),
             ),
         );
@@ -48,27 +48,27 @@ class Module implements
             'aliases' => array(
             ),
             'factories' => array(
-                'EdpSession.Service' => function ($sm) {
-                    $serviceConf = new Config($sm->get('EdpSession.serviceConfiguration'));
-                    $service     = new \EdpSession\Service\DomainSession($serviceConf);
+                'SpeckMultisite.Service' => function ($sm) {
+                    $serviceConf = new Config($sm->get('SpeckMultisite.serviceConfiguration'));
+                    $service     = new \SpeckMultisite\Service\DomainSession($serviceConf);
 
                     return $service;
                 },
-                'EdpSession.SessionManager' => function ($sm) {
-                    $sessionConf = new \Zend\Session\Configuration\SessionConfiguration($sm->get('EdpSession.sessionConfiguration'));
+                'SpeckMultisite.SessionManager' => function ($sm) {
+                    $sessionConf = new \Zend\Session\Configuration\SessionConfiguration($sm->get('SpeckMultisite.sessionConfiguration'));
                     $service     = new \Zend\Session\SessionManager($sessionConf);
 
                     return $service;
                 },
-                'EdpSession.serviceConfiguration' => function ($sm) {
+                'SpeckMultisite.serviceConfiguration' => function ($sm) {
                     $config = $sm->get('config');
 
-                    return $config['EdpSession.serviceConfiguration'];
+                    return $config['SpeckMultisite.serviceConfiguration'];
                 },
-                'EdpSession.sessionConfiguration' => function ($sm) {
+                'SpeckMultisite.sessionConfiguration' => function ($sm) {
                     $config = $sm->get('config');
 
-                    return $config['EdpSession.sessionConfiguration'];
+                    return $config['SpeckMultisite.sessionConfiguration'];
                 },
             ),
         );
