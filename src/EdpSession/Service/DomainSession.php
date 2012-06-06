@@ -8,33 +8,60 @@ use Zend\Session\Container as SessionContainer,
 
 class DomainSession
 {
+
     protected $options;
     protected $hostname;
     protected $app;
+    protected $container;
+
+    public function log($mes)
+    {
+        static $logger;
+
+        if ($logger === null) {
+            $logger = new \Zend\Log\Logger();
+            $logger->addWriter(new \Zend\Log\Writer\Stream('data/logs/session.log'));
+        }
+
+        $logger->debug($mes);
+    }
 
     public function __construct($options = null)
     {
         $this->options = $options;
     }
 
-    public function initializeSession($e)
+    public function initializeSession(\Zend\Mvc\MvcEvent $e)
     {
-        $this->app = $e->getParam('application');
+        $this->app = $e->getApplication();
         $request = $this->app->getRequest();
         $this->hostname = $request->uri()->getHost();
-        $locator = $this->app->getLocator();
-        $sessionManager = $locator->get('session-manager');
+
+        $sessionManager = $e->getApplication()->getServiceManager()->get('EdpSession.SessionManager');
         SessionContainer::setDefaultManager($sessionManager);
-        if ($request->query()->session !== null) {
-            var_dump($request->query()->redirect);
-            die();
-        }
-        if ($request->query()->sid) {
-            if ($request->query()->sid !== $sessionManager->getId()) {
-                $this->newSession($request->query()->sid);
-            }
+
+        if ($request->query()->sid !== null) {
+            $this->newSession($request->query()->sid);
         } else {
             $this->newSession();
+        }
+
+        if ($this->isMasterHost() && isset($request->query()->requestMasterSessUri)) {
+            $slaveUri                    = new \Zend\Uri\Http($request->query()->requestMasterSessUri);
+            $query                       = $slaveUri->getQueryAsArray();
+            $query['sid'] = $sessionManager->getId();
+            unset($query['requestMasterSessUri']);
+            $slaveUri->setQuery($query);
+
+            $this->app->events()->attach('dispatch', function($e) use ($slaveUri) {
+                        $response = new HttpResponse();
+                        $response->headers()->addHeaderLine('Location', rawurldecode((string) $slaveUri));
+                        $response->setStatusCode(302);
+
+                        return $response;
+                    }, 9999);
+
+            return;
         }
     }
 
@@ -43,34 +70,47 @@ class DomainSession
         $sessionManager = SessionContainer::getDefaultManager();
         if ($sid !== null) {
             $sessionManager->setId($sid);
-            $container = new SessionContainer('EdpSession');
-            if ($container->valid !== true) {
+
+            $this->container = new SessionContainer('EdpSession');
+
+            if ($this->container->valid !== true) {
                 $sessionManager->destroy();
-                die('Invalid session ID given');
-                // go fetch valid session id
+
+                return $this->newSession();
             }
         } else {
-            $this->fetchMasterSession();
-            // go fetch valid session id
-            $sessionManager->regenerateId();
-            $container = new SessionContainer('EdpSession');
-            $container->valid = true;
+            // $sessionManager->regenerateId(); ???
+            $this->container = new SessionContainer('EdpSession');
+
+            if ($this->isMasterHost()) {
+                $this->container->masterOriginated = true;
+            }
+
+            $this->container->valid = true;
+
+            if ($this->isMasterHost() === false && $this->container->masterOriginated !== true) {
+                $this->fetchMasterSession();
+            }
         }
     }
 
     public function fetchMasterSession()
     {
-        if ($this->isMasterHost() === false) {
-            $masterHost = $this->getMasterHost();
-            $uri = $this->app->getRequest()->uri();
-            $this->app->events()->attach('dispatch', function($e) use ($masterHost, $uri) {
-                $response = new HttpResponse();
-                $response->headers()->addHeaderLine('Location', 'http://' . $masterHost  . '/?session&redirect='. (string) $uri);
-                $response->setStatusCode(302);
-                $response->send();die();
-                return $response;
-            }, 9999);
-        }
+            $slaveUri = $this->app->getRequest()->uri();
+
+            $masterUri                     = new \Zend\Uri\Http($slaveUri);
+            $masterUri->setHost($this->getMasterHost());
+            $query                         = $masterUri->getQueryAsArray();
+            $query['requestMasterSessUri'] = rawurldecode((string) $slaveUri);
+            $masterUri->setQuery($query);
+
+            $this->app->events()->attach('dispatch', function($e) use ($masterUri) {
+                        $response = new HttpResponse();
+                        $response->headers()->addHeaderLine('Location', rawurldecode((string) $masterUri));
+                        $response->setStatusCode(302);
+                        $response->send();
+                        return $response;
+                    }, 9999);
     }
 
     public function isMasterHost()
@@ -83,4 +123,5 @@ class DomainSession
         $groupName = $this->options->hosts->{$this->hostname};
         return $this->options->groups->{$groupName}->master;
     }
+
 }

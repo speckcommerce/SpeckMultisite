@@ -1,47 +1,76 @@
 <?php
 
-namespace EdpSession;
+namespace SpeckMultisite;
 
 use Zend\Config\Config,
-    Zend\Module\Manager,
+        Zend\EventManager\Event,
+        Zend\ModuleManager\ModuleManager,
     Zend\EventManager\StaticEventManager,
-    Zend\Loader\AutoloaderFactory;
+    Zend\ModuleManager\Feature\AutoloaderProviderInterface,
+    Zend\ModuleManager\Feature\ServiceProviderInterface;
 
-class Module
+class Module implements
+        \Zend\ModuleManager\Feature\BootstrapListenerInterface,
+                        \Zend\ModuleManager\Feature\ConfigProviderInterface,
+                        AutoloaderProviderInterface,
+                        ServiceProviderInterface
 {
-    public function init(Manager $moduleManager)
+
+    public function onBootstrap(Event $mvcEvent)
     {
-        $this->initAutoloader();
-        $moduleManager->events()->attach('init.post', array($this, 'prepareSession'));
+        $ms = $mvcEvent->getApplication()->getServiceManager()->get('EdpSession.Service');
+        $ms->initializeSession($mvcEvent);
     }
 
-    public function initAutoloader()
+
+    public function getAutoloaderConfig()
     {
-        AutoloaderFactory::factory(array(
+        return array(
             'Zend\Loader\ClassMapAutoloader' => array(
                 __DIR__ . '/autoload_classmap.php',
             ),
             'Zend\Loader\StandardAutoloader' => array(
                 'namespaces' => array(
-                    __NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
+                    'EdpSession' => __DIR__ . '/src/EdpSession',
                 ),
             ),
-        ));
+        );
     }
 
-    public function getConfig($env = null)
+    public function getConfig()
     {
-        return new Config(include __DIR__ . '/configs/module.config.php');
+        return include __DIR__ . '/config/module.config.php';
     }
 
-    public function prepareSession($e)
+    public function getServiceConfiguration()
     {
-        $moduleManager = $e->getTarget();
-        $config = $moduleManager->getMergedConfig();
-        $sessionService = new Service\DomainSession($config->session);
-        $events = StaticEventManager::getInstance();
-        $events->attach('bootstrap', 'bootstrap', function($e) use ($sessionService) {
-            $sessionService->initializeSession($e);
-        });
+        return array(
+            'aliases' => array(
+            ),
+            'factories' => array(
+                'EdpSession.Service' => function ($sm) {
+                    $serviceConf = new Config($sm->get('EdpSession.serviceConfiguration'));
+                    $service     = new \EdpSession\Service\DomainSession($serviceConf);
+
+                    return $service;
+                },
+                'EdpSession.SessionManager' => function ($sm) {
+                    $sessionConf = new \Zend\Session\Configuration\SessionConfiguration($sm->get('EdpSession.sessionConfiguration'));
+                    $service     = new \Zend\Session\SessionManager($sessionConf);
+
+                    return $service;
+                },
+                'EdpSession.serviceConfiguration' => function ($sm) {
+                    $config = $sm->get('config');
+
+                    return $config['EdpSession.serviceConfiguration'];
+                },
+                'EdpSession.sessionConfiguration' => function ($sm) {
+                    $config = $sm->get('config');
+
+                    return $config['EdpSession.sessionConfiguration'];
+                },
+            ),
+        );
     }
 }
