@@ -1,0 +1,32 @@
+{
+    "name": "speckcommerce/SpeckMultisite",
+    "description": "ZF2 module for cross-domain sessions",
+    "type": "library",
+    "keywords": [
+        "zf2"
+    ],
+    "homepage": "http://github.com/speckcommerce/SpeckMultisite",
+    "authors": [
+        {
+            "name": "EvanDotPro",
+            "homepage": "evan.pro"
+        },
+        {
+            "name": "Bas Kamer",
+            "email": "bas@bushbaby.nl",
+            "homepage": "bushbaby.nl"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3",
+        "zendframework/zendframework": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "SpeckMultisite": "src/"
+        },
+        "classmap": [
+            "./"
+        ]
+    }
+}
