@@ -1,6 +1,6 @@
 <?php
 
-namespace EdpSession\Controller;
+namespace SpeckMultisite\Controller;
 
 use Zend\Mvc\Controller\ActionController;
 

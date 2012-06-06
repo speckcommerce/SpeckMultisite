@@ -1,7 +1,7 @@
 <?php
 
 return array(
-    'EdpSession.serviceConfiguration' => array(
+    'SpeckMultisite.serviceConfiguration' => array(
         'groups' => array(
             'groupName' => array(
             //'master' => 'mydomain.tld',
@@ -12,7 +12,7 @@ return array(
         //'myotherdomain.tld'               => 'groupName',
         ),
     ),
-    'EdpSession.sessionConfiguration' => array(
+    'SpeckMultisite.sessionConfiguration' => array(
     //'cookieDomain' => '.mydomain.tld',
     ),
 );

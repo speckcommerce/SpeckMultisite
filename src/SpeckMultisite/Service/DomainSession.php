@@ -1,6 +1,6 @@
 <?php
 
-namespace EdpSession\Service;
+namespace SpeckMultisite\Service;
 
 use Zend\Session\Container as SessionContainer,
     Zend\Http\PhpEnvironment\Response as HttpResponse,
@@ -14,17 +14,6 @@ class DomainSession
     protected $app;
     protected $container;
 
-    public function log($mes)
-    {
-        static $logger;
-
-        if ($logger === null) {
-            $logger = new \Zend\Log\Logger();
-            $logger->addWriter(new \Zend\Log\Writer\Stream('data/logs/session.log'));
-        }
-
-        $logger->debug($mes);
-    }
 
     public function __construct($options = null)
     {
@@ -37,7 +26,7 @@ class DomainSession
         $request = $this->app->getRequest();
         $this->hostname = $request->uri()->getHost();
 
-        $sessionManager = $e->getApplication()->getServiceManager()->get('EdpSession.SessionManager');
+        $sessionManager = $e->getApplication()->getServiceManager()->get('SpeckMultisite.SessionManager');
         SessionContainer::setDefaultManager($sessionManager);
 
         if ($request->query()->sid !== null) {
