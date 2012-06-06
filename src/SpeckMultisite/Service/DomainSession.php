@@ -1,6 +1,6 @@
 <?php
 
-namespace EdpSession\Service;
+namespace SpeckMultisite\Service;
 
 use Zend\Session\Container as SessionContainer,
     Zend\Http\PhpEnvironment\Response as HttpResponse,
@@ -26,7 +26,7 @@ class DomainSession
         $request = $this->app->getRequest();
         $this->hostname = $request->uri()->getHost();
 
-        $sessionManager = $e->getApplication()->getServiceManager()->get('EdpSession.SessionManager');
+        $sessionManager = $e->getApplication()->getServiceManager()->get('SpeckMultisite.SessionManager');
         SessionContainer::setDefaultManager($sessionManager);
 
         if ($request->query()->sid !== null) {
