@@ -14,17 +14,6 @@ class DomainSession
     protected $app;
     protected $container;
 
-    public function log($mes)
-    {
-        static $logger;
-
-        if ($logger === null) {
-            $logger = new \Zend\Log\Logger();
-            $logger->addWriter(new \Zend\Log\Writer\Stream('data/logs/session.log'));
-        }
-
-        $logger->debug($mes);
-    }
 
     public function __construct($options = null)
     {
