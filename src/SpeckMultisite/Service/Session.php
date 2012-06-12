@@ -27,8 +27,23 @@ class Session
         $sessionManager = $e->getApplication()->getServiceManager()->get('SpeckMultisite/SessionManager');
         SessionContainer::setDefaultManager($sessionManager);
 
-        if ($request->query()->sid !== null) {
-            $this->newSession($request->query()->sid);
+        if ($request->query()->{$sessionManager->getName()} !== null) {
+            $this->newSession($request->query()->{$sessionManager->getName()});
+
+            // when ($_COOKIE) contains session_name then it's save to redirect
+            if (isset($_COOKIE[$sessionManager->getName()])) {
+                $uri   = new \Zend\Uri\Http($request->uri());
+                $query = $uri->getQueryAsArray();
+                unset($query[$sessionManager->getName()]);
+                $uri->setQuery($query);
+                $this->app->events()->attach('dispatch', function($e) use ($uri) {
+                            $response = new HttpResponse();
+                            $response->headers()->addHeaderLine('Location', rawurldecode((string) $uri));
+                            $response->setStatusCode(302);
+
+                            return $response;
+                        }, 9999);
+            }
         } else {
             $this->newSession();
         }
@@ -36,7 +51,7 @@ class Session
         if ($this->isMasterHost() && isset($request->query()->requestMasterSessUri)) {
             $slaveUri                    = new \Zend\Uri\Http($request->query()->requestMasterSessUri);
             $query                       = $slaveUri->getQueryAsArray();
-            $query['sid'] = $sessionManager->getId();
+            $query[$sessionManager->getName()] = $sessionManager->getId();
             unset($query['requestMasterSessUri']);
             $slaveUri->setQuery($query);
 
