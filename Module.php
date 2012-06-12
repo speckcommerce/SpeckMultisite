@@ -2,9 +2,11 @@
 
 namespace SpeckMultisite;
 
-use Zend\Config\Config,
-        Zend\EventManager\Event,
-        Zend\ModuleManager\ModuleManager,
+use SpeckMultisite\Service\Session,
+    SpeckMultisite\Service\DomainResolver,
+    Zend\Config\Config,
+    Zend\EventManager\Event,
+    Zend\ModuleManager\ModuleManager,
     Zend\EventManager\StaticEventManager,
     Zend\ModuleManager\Feature\AutoloaderProviderInterface,
     Zend\ModuleManager\Feature\ServiceProviderInterface;
@@ -18,8 +20,11 @@ class Module implements
 
     public function onBootstrap(Event $mvcEvent)
     {
-        $ms = $mvcEvent->getApplication()->getServiceManager()->get('SpeckMultisite.Service');
-        $ms->initializeSession($mvcEvent);
+        $speckSessionService = $mvcEvent->getApplication()->getServiceManager()->get('SpeckMultisite/Service/Session');
+        $speckSessionService->initializeSession($mvcEvent);
+
+        $speckDomainResolverService = $mvcEvent->getApplication()->getServiceManager()->get('SpeckMultisite/Service/DomainResolver');
+        $speckDomainResolverService->resolveSiteDomain($mvcEvent->getApplication()->getRequest());
     }
 
 
@@ -48,28 +53,32 @@ class Module implements
             'aliases' => array(
             ),
             'factories' => array(
-                'SpeckMultisite.Service' => function ($sm) {
-                    $serviceConf = new Config($sm->get('SpeckMultisite.serviceConfiguration'));
-                    $service     = new \SpeckMultisite\Service\DomainSession($serviceConf);
+                'SpeckMultisite/Service/Session' => function ($sm) {
+                    $service     = new Session();
+                    $service->setDomainMap($sm->get('SpeckMultisite/Configuration')->Session->domainMap);
 
                     return $service;
                 },
-                'SpeckMultisite.SessionManager' => function ($sm) {
-                    $sessionConf = new \Zend\Session\Configuration\SessionConfiguration($sm->get('SpeckMultisite.sessionConfiguration'));
+                'SpeckMultisite/Service/DomainResolver' => function ($sm) {
+                    $service = new DomainResolver();
+
+                    $service->setDomainMap($sm->get('SpeckMultisite/Configuration')->DomainResolver->domainMap);
+                    return $service;
+                },
+
+                'SpeckMultisite/SessionManager' => function ($sm) {
+                    $sessConf = $sm->get('SpeckMultisite/Configuration')->Session->sessionManagerConfiguration;
+
+                    $sessionConf = new \Zend\Session\Configuration\SessionConfiguration($sessConf->toArray());
                     $service     = new \Zend\Session\SessionManager($sessionConf);
 
                     return $service;
                 },
-                'SpeckMultisite.serviceConfiguration' => function ($sm) {
+                'SpeckMultisite/Configuration' => function ($sm) {
                     $config = $sm->get('config');
 
-                    return $config['SpeckMultisite.serviceConfiguration'];
-                },
-                'SpeckMultisite.sessionConfiguration' => function ($sm) {
-                    $config = $sm->get('config');
-
-                    return $config['SpeckMultisite.sessionConfiguration'];
-                },
+                    return isset($config['SpeckMultisite']) ? new Config($config['SpeckMultisite']) : new Config(array());
+                }
             ),
         );
     }
