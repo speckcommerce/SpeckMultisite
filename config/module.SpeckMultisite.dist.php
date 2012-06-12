@@ -1,18 +1,28 @@
 <?php
 
 return array(
-    'SpeckMultisite.serviceConfiguration' => array(
-        'groups' => array(
-            'groupName' => array(
-                'master' => 'mydomain.tld',
+    'SpeckMultisite' => array(
+        'Session' => array(
+            'domainMap' => array(
+                'groups' => array(
+                    'groupName' => array(
+                        'master' => 'mydomain.tld',
+                    )
+                ),
+                'hosts'  => array(
+                    'mydomain.tld'                => 'groupName',
+                    'myotherdomain.tld'           => 'groupName',
+                ),
+            ),
+            'sessionManagerConfiguration' => array(
+            //'cookieDomain' => '.tld.nl',
+            ),
+        ),
+        'DomainResolver' => array(
+            'domainMap' => array(
+                'mydomain.tld'      => 'MYDOMAIN',
+                'myotherdomain.tld' => 'OTHERDOMAIN',
             )
-        ),
-        'hosts'  => array(
-            'mydomain.tld'       => 'groupName',
-            'myotherdomain.tld'     => 'groupName',
-        ),
-    ),
-    'SpeckMultisite.sessionConfiguration'                     => array(
-        //'cookieDomain' => '.mydomain.tld',
-    ),
+        )
+    )
 );
