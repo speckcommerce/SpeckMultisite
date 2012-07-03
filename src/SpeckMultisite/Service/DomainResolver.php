@@ -29,7 +29,7 @@ class DomainResolver
      */
     public function resolveSiteDomain(\Zend\Http\Request $request)
     {
-        $host = $request->server()->HTTP_HOST;
+        $host = $request->getServer()->HTTP_HOST;
 
         if (!in_array($host, array_keys($this->domainMap)))
             $this->resolvedDomain = self::DOMAIN_UNKNOWN;
