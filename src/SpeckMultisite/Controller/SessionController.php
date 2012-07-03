@@ -2,9 +2,9 @@
 
 namespace SpeckMultisite\Controller;
 
-use Zend\Mvc\Controller\ActionController;
+use Zend\Mvc\Controller\AbstractActionController;
 
-class SessionController extends ActionController
+class SessionController extends AbstractActionController
 {
     public function indexAction()
     {
