@@ -2,23 +2,28 @@
 
 namespace SpeckMultisite;
 
-use SpeckMultisite\Service\Session,
-    SpeckMultisite\Service\DomainResolver,
-    Zend\Config\Config,
-    Zend\EventManager\Event,
-    Zend\ModuleManager\ModuleManager,
-    Zend\EventManager\StaticEventManager,
-    Zend\ModuleManager\Feature\AutoloaderProviderInterface,
-    Zend\ModuleManager\Feature\ServiceProviderInterface;
+use SpeckMultisite\Service\Session;
+use SpeckMultisite\Service\DomainResolver;
+use Zend\Config\Config;
+use Zend\EventManager\EventInterface;
+use Zend\EventManager\StaticEventManager;
+use Zend\Session\Config\SessionConfig;
+use Zend\Session\SessionManager;
+use Zend\ModuleManager\ModuleManager;
+use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
+use Zend\ModuleManager\Feature\BootstrapListenerInterface;
+use Zend\ModuleManager\Feature\ConfigProviderInterface;
+use Zend\ModuleManager\Feature\ServiceProviderInterface;
+
 
 class Module implements
-        \Zend\ModuleManager\Feature\BootstrapListenerInterface,
-                        \Zend\ModuleManager\Feature\ConfigProviderInterface,
-                        AutoloaderProviderInterface,
-                        ServiceProviderInterface
+        AutoloaderProviderInterface,
+        BootstrapListenerInterface,
+        ConfigProviderInterface,
+        ServiceProviderInterface
 {
 
-    public function onBootstrap(Event $mvcEvent)
+    public function onBootstrap(EventInterface $mvcEvent)
     {
         $speckSessionService = $mvcEvent->getApplication()->getServiceManager()->get('SpeckMultisite/Service/Session');
         $speckSessionService->initializeSession($mvcEvent);
@@ -69,8 +74,8 @@ class Module implements
                 'SpeckMultisite/SessionManager' => function ($sm) {
                     $sessConf = $sm->get('SpeckMultisite/Configuration')->Session->sessionManagerConfiguration;
 
-                    $sessionConf = new \Zend\Session\Configuration\SessionConfiguration($sessConf->toArray());
-                    $service     = new \Zend\Session\SessionManager($sessionConf);
+                    $sessionConf = new SessionConfig($sessConf->toArray());
+                    $service     = new SessionManager($sessionConf);
 
                     return $service;
                 },
