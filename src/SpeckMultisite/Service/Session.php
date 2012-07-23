@@ -123,7 +123,7 @@ class Session
     public function getMasterHost()
     {
         $groupName = $this->domainMap->hosts->{$this->hostname};
-        return $this->domainMap->groups->{$groupName}->master;
+        return isset($this->domainMap->groups->{$groupName}) ? $this->domainMap->groups->{$groupName}->master : null;
     }
 
 }
