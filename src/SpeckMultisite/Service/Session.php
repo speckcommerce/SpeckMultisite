@@ -110,7 +110,7 @@ class Session
                         $response = new HttpResponse();
                         $response->getHeaders()->addHeaderLine('Location', rawurldecode((string) $masterUri));
                         $response->setStatusCode(302);
-                        $response->send();
+
                         return $response;
                     }, 9999);
     }
