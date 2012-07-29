@@ -2,9 +2,8 @@
 
 namespace SpeckMultisite\Service;
 
-use Zend\Session\Container as SessionContainer,
-    Zend\Http\PhpEnvironment\Response as HttpResponse,
-    Zend\EventManager\StaticEventManager;
+use Zend\Http\Request as HttpRequest;
+use Zend\Stdlib\RequestInterface;
 
 class DomainResolver
 {
@@ -27,9 +26,12 @@ class DomainResolver
     /**
      * Resolves on which siteDomain we currently are viewing
      */
-    public function resolveSiteDomain(\Zend\Http\Request $request)
+    public function resolveSiteDomain(RequestInterface $request)
     {
-        $host = $request->getServer()->HTTP_HOST;
+        if (!$request instanceof HttpRequest) {
+             return;
+         }
+        $host = $request->getUri()->getHost();
 
         if (!in_array($host, array_keys($this->domainMap)))
             $this->resolvedDomain = self::DOMAIN_UNKNOWN;
@@ -37,7 +39,8 @@ class DomainResolver
             $this->resolvedDomain = strtoupper ($this->domainMap[$host]);
     }
 
-    public function setDomainMap(\Zend\Config\Config $domainMap) {
+    public function setDomainMap(\Zend\Config\Config $domainMap)
+    {
         $this->domainMap = $domainMap->toArray();
     }
 
