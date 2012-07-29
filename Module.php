@@ -6,7 +6,6 @@ use SpeckMultisite\Service\Session;
 use SpeckMultisite\Service\DomainResolver;
 use Zend\Config\Config;
 use Zend\EventManager\EventInterface;
-use Zend\EventManager\StaticEventManager;
 use Zend\Session\Config\SessionConfig;
 use Zend\Session\SessionManager;
 use Zend\ModuleManager\ModuleManager;
@@ -14,7 +13,6 @@ use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\BootstrapListenerInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
 use Zend\ModuleManager\Feature\ServiceProviderInterface;
-
 
 class Module implements
         AutoloaderProviderInterface,
@@ -27,11 +25,7 @@ class Module implements
     {
         $speckSessionService = $mvcEvent->getApplication()->getServiceManager()->get('SpeckMultisite/Service/Session');
         $speckSessionService->initializeSession($mvcEvent);
-
-        $speckDomainResolverService = $mvcEvent->getApplication()->getServiceManager()->get('SpeckMultisite/Service/DomainResolver');
-        $speckDomainResolverService->resolveSiteDomain($mvcEvent->getApplication()->getRequest());
     }
-
 
     public function getAutoloaderConfig()
     {
@@ -68,6 +62,8 @@ class Module implements
                     $service = new DomainResolver();
 
                     $service->setDomainMap($sm->get('SpeckMultisite/Configuration')->DomainResolver->domainMap);
+                    $service->resolveSiteDomain($sm->get('request'));
+
                     return $service;
                 },
 
