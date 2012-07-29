@@ -4,9 +4,11 @@ namespace SpeckMultisite\Service;
 
 use Zend\Config\Config;
 use Zend\Http\PhpEnvironment\Response as HttpResponse;
+use Zend\Http\Request as HttpRequest;
 use Zend\Mvc\MvcEvent;
 use Zend\Session\Container as SessionContainer;
 use Zend\Uri\Http;
+
 
 class Session
 {
@@ -26,7 +28,7 @@ class Session
         $this->app = $e->getApplication();
         $request = $this->app->getRequest();
 
-        if (!method_exists($request, 'getUri')) {
+        if (!$request instanceof HttpRequest) {
             return;
         }
 
