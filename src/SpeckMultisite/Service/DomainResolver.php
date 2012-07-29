@@ -2,9 +2,7 @@
 
 namespace SpeckMultisite\Service;
 
-use Zend\Session\Container as SessionContainer,
-    Zend\Http\PhpEnvironment\Response as HttpResponse,
-    Zend\EventManager\StaticEventManager;
+use Zend\Http\Request as HttpRequest;
 use Zend\Stdlib\RequestInterface;
 
 class DomainResolver
@@ -30,10 +28,9 @@ class DomainResolver
      */
     public function resolveSiteDomain(RequestInterface $request)
     {
-        if (!method_exists($request, 'getUri')) {
-            return;
-        }
-
+        if (!$request instanceof HttpRequest) {
+             return;
+         }
         $host = $request->getUri()->getHost();
 
         if (!in_array($host, array_keys($this->domainMap)))
