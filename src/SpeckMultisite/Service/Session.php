@@ -2,9 +2,13 @@
 
 namespace SpeckMultisite\Service;
 
-use Zend\Session\Container as SessionContainer,
-    Zend\Http\PhpEnvironment\Response as HttpResponse,
-    Zend\EventManager\StaticEventManager;
+use Zend\Config\Config;
+use Zend\Http\PhpEnvironment\Response as HttpResponse;
+use Zend\Http\Request as HttpRequest;
+use Zend\Mvc\MvcEvent;
+use Zend\Session\Container as SessionContainer;
+use Zend\Uri\Http;
+
 
 class Session
 {
@@ -14,14 +18,20 @@ class Session
     protected $container;
     protected $domainMap;
 
-    public function setDomainMap(\Zend\Config\Config $domainMap) {
+    public function setDomainMap(Config $domainMap)
+    {
         $this->domainMap = $domainMap;
     }
 
-    public function initializeSession(\Zend\Mvc\MvcEvent $e)
+    public function initializeSession(MvcEvent $e)
     {
         $this->app = $e->getApplication();
         $request = $this->app->getRequest();
+
+        if (!$request instanceof HttpRequest) {
+            return;
+        }
+
         $this->hostname = $request->getUri()->getHost();
 
         $sessionManager = $e->getApplication()->getServiceManager()->get('SpeckMultisite/SessionManager');
@@ -100,7 +110,7 @@ class Session
     {
             $slaveUri = $this->app->getRequest()->getUri();
 
-            $masterUri                     = new \Zend\Uri\Http($slaveUri);
+            $masterUri                     = new Http($slaveUri);
             $masterUri->setHost($this->getMasterHost());
             $query                         = $masterUri->getQueryAsArray();
             $query['requestMasterSessUri'] = rawurldecode((string) $slaveUri);
@@ -123,6 +133,7 @@ class Session
     public function getMasterHost()
     {
         $groupName = $this->domainMap->hosts->{$this->hostname};
+
         return isset($this->domainMap->groups->{$groupName}) ? $this->domainMap->groups->{$groupName}->master : null;
     }
 
