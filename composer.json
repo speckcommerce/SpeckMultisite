@@ -1,5 +1,5 @@
 {
-    "name": "speckcommerce/SpeckMultisite",
+    "name": "speckcommerce/speck-multisite",
     "description": "ZF2 module for cross-domain sessions",
     "type": "library",
     "keywords": [
