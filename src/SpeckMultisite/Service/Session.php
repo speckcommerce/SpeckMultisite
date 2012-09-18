@@ -125,7 +125,6 @@ class Session
 
     public function isMasterHost()
     {
-        //var_dump($this->hostname, $this->getMasterHost()); die();
         return ($this->hostname === $this->getMasterHost());
     }
 
