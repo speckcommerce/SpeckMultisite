@@ -2,8 +2,6 @@
 
 namespace SpeckMultisite;
 
-//var_dump($_SERVER);
-
 use SpeckMultisite\Service\Session;
 use SpeckMultisite\Service\DomainResolver;
 use Zend\Config\Config;
