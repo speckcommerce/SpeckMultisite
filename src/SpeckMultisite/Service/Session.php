@@ -109,7 +109,6 @@ class Session
     public function fetchMasterSession()
     {
             $slaveUri = $this->app->getRequest()->getUri();
-
             $masterUri                     = new Http($slaveUri);
             $masterUri->setHost($this->getMasterHost());
             $query                         = $masterUri->getQueryAsArray();
@@ -120,21 +119,29 @@ class Session
                         $response = new HttpResponse();
                         $response->getHeaders()->addHeaderLine('Location', rawurldecode((string) $masterUri));
                         $response->setStatusCode(302);
-
                         return $response;
                     }, 9999);
     }
 
     public function isMasterHost()
     {
+        //var_dump($this->hostname, $this->getMasterHost()); die();
         return ($this->hostname === $this->getMasterHost());
     }
 
     public function getMasterHost()
     {
         $groupName = $this->domainMap->hosts->{$this->hostname};
+        if(!$groupName) {
+            throw new \Exception('host not listed in domain map - ' . $this->hostname);
+        }
 
-        return isset($this->domainMap->groups->{$groupName}) ? $this->domainMap->groups->{$groupName}->master : null;
+        $group = (isset($this->domainMap->groups->{$groupName}) ? $this->domainMap->groups->{$groupName}->master : null);
+        if(!$group) {
+            throw new \Exception('group name \'' . $groupName . '\' not found as indicated for domain - ' . $this->hostname);
+        }
+
+        return $group;
     }
 
 }
