@@ -12,7 +12,6 @@ use Zend\Uri\Http;
 
 class Session
 {
-
     protected $hostname;
     protected $app;
     protected $container;
@@ -108,19 +107,23 @@ class Session
 
     public function fetchMasterSession()
     {
-            $slaveUri = $this->app->getRequest()->getUri();
-            $masterUri                     = new Http($slaveUri);
-            $masterUri->setHost($this->getMasterHost());
-            $query                         = $masterUri->getQueryAsArray();
-            $query['requestMasterSessUri'] = rawurldecode((string) $slaveUri);
-            $masterUri->setQuery($query);
+        $slaveUri   = $this->app->getRequest()->getUri();
+        $masterUri  = new Http($slaveUri);
+        $masterHost = $this->getMasterHost();
+        if (!$masterHost) {
+            return;
+        }
+        $masterUri->setHost($masterHost);
+        $query                         = $masterUri->getQueryAsArray();
+        $query['requestMasterSessUri'] = rawurldecode((string) $slaveUri);
+        $masterUri->setQuery($query);
 
-            $this->app->getEventManager()->attach('dispatch', function($e) use ($masterUri) {
-                        $response = new HttpResponse();
-                        $response->getHeaders()->addHeaderLine('Location', rawurldecode((string) $masterUri));
-                        $response->setStatusCode(302);
-                        return $response;
-                    }, 9999);
+        $this->app->getEventManager()->attach('dispatch', function($e) use ($masterUri) {
+            $response = new HttpResponse();
+            $response->getHeaders()->addHeaderLine('Location', rawurldecode((string) $masterUri));
+            $response->setStatusCode(302);
+            return $response;
+        }, 9999);
     }
 
     public function isMasterHost()
@@ -132,12 +135,14 @@ class Session
     {
         $groupName = $this->domainMap->hosts->{$this->hostname};
         if(!$groupName) {
-            throw new \Exception('host not listed in domain map - ' . $this->hostname);
+            //throw new \Exception('host not listed in domain map - ' . $this->hostname);
+            return false;
         }
 
         $group = (isset($this->domainMap->groups->{$groupName}) ? $this->domainMap->groups->{$groupName}->master : null);
         if(!$group) {
-            throw new \Exception('group name \'' . $groupName . '\' not found as indicated for domain - ' . $this->hostname);
+            //throw new \Exception('group name \'' . $groupName . '\' not found as indicated for domain - ' . $this->hostname);
+            return false;
         }
 
         return $group;
