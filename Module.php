@@ -9,6 +9,7 @@ use Zend\EventManager\EventInterface;
 use Zend\Session\Config\SessionConfig;
 use Zend\Session\SessionManager;
 use Zend\ModuleManager\ModuleManager;
+use Zend\ModuleManager\ModuleEvent;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\BootstrapListenerInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
@@ -21,10 +22,34 @@ class Module implements
         ServiceProviderInterface
 {
 
+    protected $serviceLocator;
+
+    public function init($mm)
+    {
+        $mm->getEventManager()->attach(
+            ModuleEvent::EVENT_LOAD_MODULES_POST, array($this, 'loadAdditionalModules')
+        );
+    }
+
     public function onBootstrap(EventInterface $mvcEvent)
     {
         $speckSessionService = $mvcEvent->getApplication()->getServiceManager()->get('SpeckMultisite/Service/Session');
         $speckSessionService->initializeSession($mvcEvent);
+    }
+
+    public function loadAdditionalModules(EventInterface $e)
+    {
+        $sm     = $e->getParam('ServiceManager');
+        $domain = $sm->get('multisite_domain_data');
+
+        if (isset($domain['additional_modules'])) {
+            return;
+        }
+
+        $mm = $sm->get('ModuleManager');
+        foreach($domain['additional_modules'] as $module) {
+            $mm->loadModule($module);
+        }
     }
 
     public function getAutoloaderConfig()
@@ -79,7 +104,13 @@ class Module implements
                     $config = $sm->get('config');
 
                     return isset($config['SpeckMultisite']) ? new Config($config['SpeckMultisite']) : new Config(array());
-                }
+                },
+                'multisite_domain_data' => function ($sm) {
+                    $config  = $sm->get('SpeckMultisite/Configuration');
+                    $domain  = $sm->get('SpeckMultisite/Service/DomainResolver')->getDomain();
+                    $domains = $config->get('domain_data');
+                    return ($domains->get($domain)->toArray()) ? : array();
+                },
             ),
         );
     }
