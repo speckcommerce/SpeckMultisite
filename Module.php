@@ -4,11 +4,13 @@ namespace SpeckMultisite;
 
 use SpeckMultisite\Service\Session;
 use SpeckMultisite\Service\DomainResolver;
+use SpeckMultisite\Service\AdminService;
 use Zend\Config\Config;
 use Zend\EventManager\EventInterface;
 use Zend\Session\Config\SessionConfig;
 use Zend\Session\SessionManager;
 use Zend\ModuleManager\ModuleManager;
+use Zend\ModuleManager\ModuleEvent;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\BootstrapListenerInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
@@ -21,10 +23,34 @@ class Module implements
         ServiceProviderInterface
 {
 
+    protected $serviceLocator;
+
+    public function init($mm)
+    {
+        $mm->getEventManager()->attach(
+            ModuleEvent::EVENT_LOAD_MODULES_POST, array($this, 'loadAdditionalModules')
+        );
+    }
+
     public function onBootstrap(EventInterface $mvcEvent)
     {
         $speckSessionService = $mvcEvent->getApplication()->getServiceManager()->get('SpeckMultisite/Service/Session');
         $speckSessionService->initializeSession($mvcEvent);
+    }
+
+    public function loadAdditionalModules(EventInterface $e)
+    {
+        $sm     = $e->getParam('ServiceManager');
+        $domain = $sm->get('multisite_domain_data');
+
+        if (!isset($domain['additional_modules'])) {
+            return;
+        }
+
+        $mm = $sm->get('ModuleManager');
+        foreach($domain['additional_modules'] as $module) {
+            $mm->loadModule($module);
+        }
     }
 
     public function getAutoloaderConfig()
@@ -66,7 +92,11 @@ class Module implements
 
                     return $service;
                 },
-
+                'multisite_admin_service' => function ($sm) {
+                    $service = new AdminService;
+                    $service->setMapper($sm->get('multisite_admin_mapper'));
+                    return $service;
+                },
                 'SpeckMultisite/SessionManager' => function ($sm) {
                     $sessConf = $sm->get('SpeckMultisite/Configuration')->Session->sessionManagerConfiguration;
 
@@ -79,7 +109,15 @@ class Module implements
                     $config = $sm->get('config');
 
                     return isset($config['SpeckMultisite']) ? new Config($config['SpeckMultisite']) : new Config(array());
-                }
+                },
+                'multisite_domain_data' => function ($sm) {
+                    $config     = $sm->get('SpeckMultisite/Configuration');
+                    $domainName = $sm->get('SpeckMultisite/Service/DomainResolver')->getDomain();
+                    $domains    = $config->get('domain_data');
+                    $domain     = $domains->get($domainName);
+
+                    return ($domain) ? $domain->toArray() : array();
+                },
             ),
         );
     }

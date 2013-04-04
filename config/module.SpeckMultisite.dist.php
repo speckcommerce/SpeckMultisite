@@ -23,6 +23,24 @@ return array(
                 'mydomain.tld'      => 'MYDOMAIN',
                 'myotherdomain.tld' => 'OTHERDOMAIN',
             )
+        ),
+        'domain_data' => array(
+            'MYDOMAIN' => array(
+                'name' => 'MYDOMAIN',
+                'display_name' => 'My Domain',
+                'additional_modules' => array(
+                    //'MyDomainLayoutModule',
+                ),
+            ),
+        ),
+        'domain_data' => array(
+            'OTHERDOMAIN' => array(
+                'name' => 'OTHERDOMAIN',
+                'display_name' => 'Other Domain',
+                'additional_modules' => array(
+                    //'MyDomainLayoutModule',
+                ),
+            ),
         )
     )
 );
