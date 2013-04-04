@@ -31,14 +31,24 @@ return array(
                 'additional_modules' => array(
                     //'MyDomainLayoutModule',
                 ),
+                'data' => array(
+                    //'global_var' = 'foo',
+                    //'MyModule' => array(
+                    //    'mymodule_somevar' => 'bar',
+                    //),
+                ),
             ),
-        ),
-        'domain_data' => array(
             'OTHERDOMAIN' => array(
                 'name' => 'OTHERDOMAIN',
                 'display_name' => 'Other Domain',
                 'additional_modules' => array(
                     //'MyDomainLayoutModule',
+                ),
+                'data' => array(
+                    //'global_var' = 'foo',
+                    //'MyModule' => array(
+                    //    'mymodule_somevar' => 'bar',
+                    //),
                 ),
             ),
         )
