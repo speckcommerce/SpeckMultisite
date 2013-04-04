@@ -1,0 +1,19 @@
+<? foreach($sites as $name => $site) : ?>
+    <h5><?=$name; ?></h3>
+    <pre>
+<?=$site; ?>
+    </pre>
+    <hr/>
+<? endforeach; ?>
+
+<form method="POST" action="<?=$this->url('zfcadmin/sites/add'); ?>">
+    <div class="row">
+        <div class="span2">
+            <input type="text" class="span2" name="name"/>
+            <br/>
+        </div>
+        <div class="span1">
+            <input type="submit" class="btn btn" value="Add Site"/>
+        </div>
+    </div>
+</form>
