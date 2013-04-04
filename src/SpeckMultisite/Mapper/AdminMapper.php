@@ -4,11 +4,16 @@ namespace SpeckMultisite\Mapper;
 
 use Zend\Db\Resultset\ResultSet;
 use Zend\Db\Adapter\AdapterAwareInterface;
+use Zend\Db\Adapter\Adapter;
+use Zend\Db\Sql\Select;
+use ZfcBase\Mapper\AbstractDbMapper;
+use Zend\Stdlib\Hydrator\HydratorInterface;
 
-class AdminMapper extends ZfcBase\Mapper\AbstractDbMapper
-    implements AdapterAwareInterface
+class AdminMapper extends AbstractDbMapper implements AdapterAwareInterface
 {
+    protected $dbAdapter;
     protected $tableName = 'website';
+    protected $isInitialized = false;
 
     public function initialize()
     {
@@ -23,26 +28,36 @@ class AdminMapper extends ZfcBase\Mapper\AbstractDbMapper
         $this->isInitialized = true;
     }
 
-    public function getAll()
+    public function getAllSites()
     {
         $select = $this->getSelect();
         return $this->select($select);
     }
 
-    public function insert(array $data)
+    public function insert($data, $tableName=null, HydratorInterface $hydrator=null)
     {
+        $this->initialize();
+        $tableName = $tableName ?: $this->tableName;
 
+        $sql = $this->getSql()->setTable($tableName);
+        $insert = $sql->insert();
+
+        $insert->values($data);
+
+        $statement = $sql->prepareStatementForSqlObject($insert);
+
+        return $statement->execute();
     }
 
-    public function update(array $data)
+    public function update($data, $where=null, $tableName=null, HydratorInterface $hydrator=null)
     {
     }
 
-    public function delete(array $data)
+    public function delete($where, $tableName=null)
     {
     }
 
-    public function select($select)
+    public function select(Select $select, $entityPrototype=null, HydratorInterface $hydrator=null)
     {
         $this->initialize();
 
@@ -51,8 +66,26 @@ class AdminMapper extends ZfcBase\Mapper\AbstractDbMapper
         $resultSet = new ResultSet;
         $resultSet->initialize($stmt->execute());
 
-        return $resultSet;
+        return $resultSet->toArray();
     }
 
 
+
+    /**
+     * @return dbAdapter
+     */
+    public function getDbAdapter()
+    {
+        return $this->dbAdapter;
+    }
+
+    /**
+     * @param $dbAdapter
+     * @return self
+     */
+    public function setDbAdapter(Adapter $dbAdapter)
+    {
+        $this->dbAdapter = $dbAdapter;
+        return $this;
+    }
 }

@@ -2,6 +2,8 @@
 
 namespace SpeckMultisite\Service;
 
+use ZfcBase\Mapper\AbstractDbMapper;
+
 class AdminService
 {
     protected $mapper;
@@ -9,6 +11,11 @@ class AdminService
     public function getAllSites()
     {
         return $this->getMapper()->getAllSites();
+    }
+
+    public function addSite($data)
+    {
+        return $this->getMapper()->insert($data);
     }
 
     /**
@@ -23,7 +30,7 @@ class AdminService
      * @param $mapper
      * @return self
      */
-    public function setMapper($mapper)
+    public function setMapper(AbstractDbMapper $mapper)
     {
         $this->mapper = $mapper;
         return $this;

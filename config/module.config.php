@@ -3,7 +3,6 @@
 return array(
     'service_manager' => array(
         'invokables' => array(
-            'multisite_admin_service' => 'SpeckMultisite\Service\AdminService',
             'multisite_admin_mapper'  => 'SpeckMultisite\Mapper\AdminMapper',
         ),
     ),
@@ -31,6 +30,18 @@ return array(
                             'defaults' => array(
                                 'controller' => 'multisite_admin',
                                 'action' => 'index'
+                            ),
+                        ),
+                        'may_terminate' => true,
+                        'child_routes' => array(
+                            'add' => array(
+                                'type' => 'literal',
+                                'options' => array(
+                                    'route' => '/add',
+                                    'defaults' => array(
+                                        'action' => 'add-site',
+                                    ),
+                                ),
                             ),
                         ),
                     ),
@@ -63,13 +74,6 @@ return array(
             )
         ),
         'domain_data' => array(
-            'SPECKCOMMERCE' => array(
-                'name' => 'SPECKCOMMERCE',
-                'display_name' => 'SpeckCommerce',
-                'additional_modules' => array(
-                    //'MyDomainLayoutModule',
-                ),
-            ),
-        )
-    )
+        ),
+    ),
 );

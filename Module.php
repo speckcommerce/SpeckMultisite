@@ -4,6 +4,7 @@ namespace SpeckMultisite;
 
 use SpeckMultisite\Service\Session;
 use SpeckMultisite\Service\DomainResolver;
+use SpeckMultisite\Service\AdminService;
 use Zend\Config\Config;
 use Zend\EventManager\EventInterface;
 use Zend\Session\Config\SessionConfig;
@@ -42,7 +43,7 @@ class Module implements
         $sm     = $e->getParam('ServiceManager');
         $domain = $sm->get('multisite_domain_data');
 
-        if (isset($domain['additional_modules'])) {
+        if (!isset($domain['additional_modules'])) {
             return;
         }
 
@@ -91,7 +92,11 @@ class Module implements
 
                     return $service;
                 },
-
+                'multisite_admin_service' => function ($sm) {
+                    $service = new AdminService;
+                    $service->setMapper($sm->get('multisite_admin_mapper'));
+                    return $service;
+                },
                 'SpeckMultisite/SessionManager' => function ($sm) {
                     $sessConf = $sm->get('SpeckMultisite/Configuration')->Session->sessionManagerConfiguration;
 
@@ -106,10 +111,12 @@ class Module implements
                     return isset($config['SpeckMultisite']) ? new Config($config['SpeckMultisite']) : new Config(array());
                 },
                 'multisite_domain_data' => function ($sm) {
-                    $config  = $sm->get('SpeckMultisite/Configuration');
-                    $domain  = $sm->get('SpeckMultisite/Service/DomainResolver')->getDomain();
-                    $domains = $config->get('domain_data');
-                    return ($domains->get($domain)->toArray()) ? : array();
+                    $config     = $sm->get('SpeckMultisite/Configuration');
+                    $domainName = $sm->get('SpeckMultisite/Service/DomainResolver')->getDomain();
+                    $domains    = $config->get('domain_data');
+                    $domain     = $domains->get($domainName);
+
+                    return ($domain) ? $domain->toArray() : array();
                 },
             ),
         );
