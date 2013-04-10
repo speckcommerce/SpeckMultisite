@@ -1,9 +1,14 @@
+<?
+    $activeDomain = isset($this->current['name']) ? $this->current['name'] : 'none';
+?>
+
+    <h4> Active multisite domain: <?=$activeDomain;?> </h4>
+
 <? foreach($sites as $name => $site) : ?>
-    <h5><?=$name; ?></h3>
+<h5><?=$name; ?> <?=($activeDomain === $name) ? '(ACTIVE)' : ''; ?></h3>
     <pre>
 <?=$site; ?>
     </pre>
-    <hr/>
 <? endforeach; ?>
 
 <form method="POST" action="<?=$this->url('zfcadmin/sites/add'); ?>">

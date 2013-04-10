@@ -1,5 +1,6 @@
 <?php
 
+
 namespace SpeckMultisite\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
@@ -10,6 +11,7 @@ class MultisiteAdmin extends AbstractActionController
 
     public function indexAction()
     {
+        $domain = $this->getServiceLocator()->get('ServiceManager')->get('multisite_domain_data');
         $sites = $this->getAdminService()->getAllSites();
         $data = $this->getServiceLocator()->get('Config')['SpeckMultisite']['domain_data'];
         $return = array();
@@ -18,7 +20,7 @@ class MultisiteAdmin extends AbstractActionController
                 ? var_export($data[$site['name']], 1)
                 : '';
         }
-        return array('sites' => $return);
+        return array('sites' => $return, 'current' => $domain);
     }
 
     public function addSiteAction()

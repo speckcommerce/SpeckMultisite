@@ -37,6 +37,7 @@ class Session
         SessionContainer::setDefaultManager($sessionManager);
 
         if ($request->getQuery()->{$sessionManager->getName()} !== null) {
+            //die('newsession with id');
             $this->newSession($request->getQuery()->{$sessionManager->getName()});
 
             // when ($_COOKIE) contains session_name then it's save to redirect
