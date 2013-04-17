@@ -28,9 +28,6 @@ return array(
             'MYDOMAIN' => array(
                 'name' => 'MYDOMAIN',
                 'display_name' => 'My Domain',
-                'additional_modules' => array(
-                    //'MyDomainLayoutModule',
-                ),
                 'data' => array(
                     //'global_var' = 'foo',
                     //'MyModule' => array(
@@ -41,9 +38,6 @@ return array(
             'OTHERDOMAIN' => array(
                 'name' => 'OTHERDOMAIN',
                 'display_name' => 'Other Domain',
-                'additional_modules' => array(
-                    //'MyDomainLayoutModule',
-                ),
                 'data' => array(
                     //'global_var' = 'foo',
                     //'MyModule' => array(

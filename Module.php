@@ -25,32 +25,11 @@ class Module implements
 
     protected $serviceLocator;
 
-    public function init($mm)
-    {
-        $mm->getEventManager()->attach(
-            ModuleEvent::EVENT_LOAD_MODULES_POST, array($this, 'loadAdditionalModules')
-        );
-    }
 
     public function onBootstrap(EventInterface $mvcEvent)
     {
         $speckSessionService = $mvcEvent->getApplication()->getServiceManager()->get('SpeckMultisite/Service/Session');
         $speckSessionService->initializeSession($mvcEvent);
-    }
-
-    public function loadAdditionalModules(EventInterface $e)
-    {
-        $sm     = $e->getParam('ServiceManager');
-        $domain = $sm->get('multisite_domain_data');
-
-        if (!isset($domain['additional_modules'])) {
-            return;
-        }
-
-        $mm = $sm->get('ModuleManager');
-        foreach($domain['additional_modules'] as $module) {
-            $mm->loadModule($module);
-        }
     }
 
     public function getAutoloaderConfig()
