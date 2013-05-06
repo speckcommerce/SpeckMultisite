@@ -95,7 +95,13 @@ class Module implements
                     $domains    = $config->get('domain_data');
                     $domain     = $domains->get($domainName);
 
-                    return ($domain) ? $domain->toArray() : array();
+                    if(!$domain) {
+                        return array('website_id' => 1);
+                    }
+
+                    $site = $sm->get('multisite_admin_service')->find($domain->toArray()) ?: array('website_id' => 1);
+
+                    return array_merge($site, $domain->toArray());
                 },
             ),
         );

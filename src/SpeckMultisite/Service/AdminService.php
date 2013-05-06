@@ -8,6 +8,20 @@ class AdminService
 {
     protected $mapper;
 
+    public function find(array $data)
+    {
+        $where = array();
+
+        if (isset($data['website_id'])) {
+            $where['website_id'] = $data['website_id'];
+        }
+        if (isset($data['name'])) {
+            $where['name'] = $data['name'];
+        }
+
+        return $this->getMapper()->find($where);
+    }
+
     public function getAllSites()
     {
         return $this->getMapper()->getAllSites();

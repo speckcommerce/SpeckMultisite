@@ -28,6 +28,14 @@ class AdminMapper extends AbstractDbMapper implements AdapterAwareInterface
         $this->isInitialized = true;
     }
 
+    public function find(array $where)
+    {
+        $select = $this->getSelect();
+        $select->where($where);
+
+        return $this->select($select->where($where));
+    }
+
     public function getAllSites()
     {
         $select = $this->getSelect();
