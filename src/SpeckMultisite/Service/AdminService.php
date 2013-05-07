@@ -22,6 +22,13 @@ class AdminService
         return $this->getMapper()->find($where);
     }
 
+    public function findByName($name)
+    {
+        $result = $this->getMapper()->find(array('name' => $name));
+        return isset($result[0]) ? $result[0] : null;
+    }
+
+
     public function getAllSites()
     {
         return $this->getMapper()->getAllSites();

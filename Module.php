@@ -99,7 +99,7 @@ class Module implements
                         return array('website_id' => 1);
                     }
 
-                    $site = $sm->get('multisite_admin_service')->find($domain->toArray()) ?: array('website_id' => 1);
+                    $site = $sm->get('multisite_admin_service')->findByName($domain['name']) ?: array('website_id' => 1);
 
                     return array_merge($site, $domain->toArray());
                 },
