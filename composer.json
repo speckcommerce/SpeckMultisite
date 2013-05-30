@@ -9,12 +9,12 @@
     "authors": [
         {
             "name": "EvanDotPro",
-            "homepage": "evan.pro"
+            "homepage": "http://evan.pro/"
         },
         {
             "name": "Bas Kamer",
             "email": "bas@bushbaby.nl",
-            "homepage": "bushbaby.nl"
+            "homepage": "http://bushbaby.nl/"
         }
     ],
     "require": {
